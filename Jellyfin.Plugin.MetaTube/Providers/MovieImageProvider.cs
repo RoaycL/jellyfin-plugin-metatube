@@ -98,6 +98,11 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
         if (!string.Equals(normalizedId, pid.Id, StringComparison.OrdinalIgnoreCase))
             Add(pid.Provider, normalizedId);
 
+        var fc2Ids = ExpandFc2Ids(pid.Id)
+            .Concat(ExpandFc2Ids(normalizedId))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
         // Common recovery path: AVBASE ids often cannot fetch images directly, while JavBus can.
         if (string.Equals(pid.Provider, "AVBASE", StringComparison.OrdinalIgnoreCase))
         {
@@ -111,6 +116,16 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
         Add("JavBus", normalizedId);
         Add("JavDB", normalizedId);
         Add("JavLibrary", normalizedId);
+
+        // FC2 compatibility: try several common normalized forms across likely providers.
+        foreach (var fc2Id in fc2Ids)
+        {
+            Add(pid.Provider, fc2Id);
+            Add("FC2PPVDB", fc2Id);
+            Add("FC2Hub", fc2Id);
+            Add("JavDB", fc2Id);
+            Add("JavLibrary", fc2Id);
+        }
 
         return list;
     }
@@ -131,6 +146,27 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
             s = s.Substring(idx + 1);
 
         return s.Trim();
+    }
+
+    private static IEnumerable<string> ExpandFc2Ids(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            yield break;
+
+        var raw = id.Trim();
+        var upper = raw.ToUpperInvariant();
+        if (!upper.Contains("FC2") && !upper.Contains("PPV"))
+            yield break;
+
+        var digits = new string(raw.Where(char.IsDigit).ToArray());
+        if (string.IsNullOrWhiteSpace(digits))
+            yield break;
+
+        yield return $"FC2-PPV-{digits}";
+        yield return $"FC2PPV-{digits}";
+        yield return $"FC2PPV{digits}";
+        yield return $"PPV-{digits}";
+        yield return digits;
     }
 
     private IEnumerable<RemoteImageInfo> BuildImages(string provider, string id, double? position, IEnumerable<string> previewImages)
