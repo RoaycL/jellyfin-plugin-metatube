@@ -163,7 +163,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string BaiduAppKey { get; set; } = string.Empty;
 
 #if __EMBY__
-    [DisplayName("Google API Key")]
+    [DisplayName("Google API 密钥")]
     [VisibleCondition(nameof(TranslationEngine), ValueCondition.IsEqual, TranslationEngine.Google)]
 #endif
     public string GoogleApiKey { get; set; } = string.Empty;
@@ -176,7 +176,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string GoogleApiUrl { get; set; } = string.Empty;
 
 #if __EMBY__
-    [DisplayName("DeepL API Key")]
+    [DisplayName("DeepL API 密钥")]
     [VisibleCondition(nameof(TranslationEngine), ValueCondition.IsEqual, TranslationEngine.DeepL)]
 #endif
     public string DeepLApiKey { get; set; } = string.Empty;
@@ -189,7 +189,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string DeepLApiUrl { get; set; } = string.Empty;
 
 #if __EMBY__
-    [DisplayName("OpenAI API Key")]
+    [DisplayName("OpenAI API 密钥")]
     [VisibleCondition(nameof(TranslationEngine), ValueCondition.IsEqual, TranslationEngine.OpenAi)]
 #endif
     public string OpenAiApiKey { get; set; } = string.Empty;
