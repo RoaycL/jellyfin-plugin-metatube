@@ -13,160 +13,160 @@
             <h1>MetaTube</h1>
 
             <div class="readOnlyContent">
-                <p class="description1">MetaTube Plugin for Jellyfin/Emby. <a class="button-link emby-button" href="https://metatube-community.github.io" is="emby-linkbutton" target="_blank">Learn more</a>.</p>
+                <p class="description1">MetaTube 插件（适用于 Jellyfin/Emby）。 <a class="button-link emby-button" href="https://metatube-community.github.io" is="emby-linkbutton" target="_blank">了解更多</a>.</p>
             </div>
 
             <form class="MetaTubeConfigurationForm">
 
                 <div class="verticalSection">
-                    <h2>General</h2>
+                    <h2>通用</h2>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtServer">Server:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtServer">服务器：</label>
                         <input id="txtServer" is="emby-input" name="txtServer" pattern="^https?://.+$" required
                                type="text"/>
-                        <div class="fieldDescription">Full url of the MetaTube Server, HTTPS protocol is recommended.</div>
+                        <div class="fieldDescription">MetaTube 服务端完整地址，建议使用 HTTPS。</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtToken">Token:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtToken">令牌：</label>
                         <input id="txtToken" is="emby-input" name="txtToken" type="text"/>
-                        <div class="fieldDescription">Access token for the MetaTube Server, or blank if no token is set by the backend.</div>
+                        <div class="fieldDescription">MetaTube 服务端访问令牌；如果后端未设置令牌可留空。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableCollections" is="emby-checkbox" name="chkEnableCollections" type="checkbox"/>
-                            <span>Enable collections</span>
+                            <span>启用合集</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Automatically create collections by series.</div>
+                        <div class="fieldDescription checkboxFieldDescription">按系列自动创建合集。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableDirectors" is="emby-checkbox" name="chkEnableDirectors" type="checkbox"/>
-                            <span>Enable directors</span>
+                            <span>启用导演</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Add directors to corresponding video metadata.</div>
+                        <div class="fieldDescription checkboxFieldDescription">将导演写入对应视频元数据。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableRatings" is="emby-checkbox" name="chkEnableRatings" type="checkbox"/>
-                            <span>Enable ratings</span>
+                            <span>启用评分</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Display community ratings from the original website.</div>
+                        <div class="fieldDescription checkboxFieldDescription">显示来源站点的社区评分。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableTrailers" is="emby-checkbox" name="chkEnableTrailers" type="checkbox"/>
-                            <span>Enable trailers</span>
+                            <span>启用预告片</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Generate online video trailers in strm format.</div>
+                        <div class="fieldDescription checkboxFieldDescription">生成在线视频预告（strm 格式）。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableRealActorNames" is="emby-checkbox" name="chkEnableRealActorNames" type="checkbox"/>
-                            <span>Enable real actor names</span>
+                            <span>启用演员真名</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Search and replace with real actor names from AVBASE.</div>
+                        <div class="fieldDescription checkboxFieldDescription">从 AVBASE 获取并替换为演员真名。</div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Badge</h2>
+                    <h2 class="sectionTitle">角标</h2>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableBadges" is="emby-checkbox" name="chkEnableBadges" type="checkbox"/>
-                            <span>Enable badges</span>
+                            <span>启用角标</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Add Chinese subtitle badges to primary images.</div>
+                        <div class="fieldDescription checkboxFieldDescription">为主图添加中文字幕角标。</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtBadgeUrl">Badge url:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtBadgeUrl">角标地址：</label>
                         <input id="txtBadgeUrl" is="emby-input" name="txtBadgeUrl" type="text"/>
-                        <div class="fieldDescription">Custom badge url, PNG format is recommended. (default: zimu.png)</div>
+                        <div class="fieldDescription">自定义角标地址，建议使用 PNG。（默认：zimu.png）</div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Image</h2>
+                    <h2 class="sectionTitle">图片</h2>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtPrimaryImageRatio">Primary image ratio:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtPrimaryImageRatio">主图比例：</label>
                         <input id="txtPrimaryImageRatio" is="emby-input" name="txtPrimaryImageRatio" step="any" type="number"/>
-                        <div class="fieldDescription">Aspect ratio for primary images, set a negative value to use the default.</div>
+                        <div class="fieldDescription">主图宽高比，设为负数时使用默认值。</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtDefaultImageQuality">Default image quality:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtDefaultImageQuality">默认图片质量：</label>
                         <input id="txtDefaultImageQuality" is="emby-input" max="100" min="0" name="txtDefaultImageQuality" step="1" type="number"/>
-                        <div class="fieldDescription">Default compression quality for JPEG images, set between 0 and 100. (default: 90)</div>
+                        <div class="fieldDescription">JPEG 图片默认压缩质量，范围 0 到 100。（默认：90）</div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Provider</h2>
+                    <h2 class="sectionTitle">数据源</h2>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableMovieProviderFilter" is="emby-checkbox" name="chkEnableMovieProviderFilter" type="checkbox"/>
-                            <span>Enable movie provider filter</span>
+                            <span>启用影片来源过滤</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Filter and reorder search results from movie providers.</div>
+                        <div class="fieldDescription checkboxFieldDescription">过滤并重排影片来源的搜索结果。</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtRawMovieProviderFilter">Movie provider filter:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtRawMovieProviderFilter">影片来源过滤：</label>
                         <input id="txtRawMovieProviderFilter" is="emby-input" name="txtRawMovieProviderFilter" type="text"/>
-                        <div class="fieldDescription">Provider names are case-insensitive, with decreasing precedence from left to right, separated by commas.</div>
+                        <div class="fieldDescription">来源名称不区分大小写，按从左到右优先级递减，使用逗号分隔。</div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Template</h2>
+                    <h2 class="sectionTitle">模板</h2>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableTemplate" is="emby-checkbox" name="chkEnableTemplate" type="checkbox"/>
-                            <span>Enable template</span>
+                            <span>启用模板</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">Predefined template variables can be found <a class="button-link emby-button" href="https://metatube-community.github.io/wiki/text-template/" is="emby-linkbutton" target="_blank">here</a>.</div>
+                        <div class="fieldDescription checkboxFieldDescription">预定义模板变量可参考 <a class="button-link emby-button" href="https://metatube-community.github.io/wiki/text-template/" is="emby-linkbutton" target="_blank">这里</a>.</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtNameTemplate">Name template:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtNameTemplate">名称模板：</label>
                         <input id="txtNameTemplate" is="emby-input" name="txtNameTemplate" type="text"/>
                         <div class="fieldDescription"></div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="txtTaglineTemplate">Tagline template:</label>
+                        <label class="inputLabel inputLabelUnfocused" for="txtTaglineTemplate">副标题模板：</label>
                         <input id="txtTaglineTemplate" is="emby-input" name="txtTaglineTemplate" type="text"/>
                         <div class="fieldDescription"></div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Translation</h2>
+                    <h2 class="sectionTitle">翻译</h2>
 
                     <div class="selectContainer">
-                        <label class="selectLabel selectLabelText" for="selectTranslationMode">Translation mode:</label>
+                        <label class="selectLabel selectLabelText" for="selectTranslationMode">翻译模式：</label>
                         <select class="emby-select-withcolor emby-select selectTranslationMode" id="selectTranslationMode" is="emby-select" name="selectTranslationMode">
-                            <option value="Disabled">Disabled</option>
-                            <option value="Title">Title</option>
-                            <option value="Summary">Summary</option>
-                            <option value="Both">Title and Summary</option>
+                            <option value="Disabled">禁用</option>
+                            <option value="Title">标题</option>
+                            <option value="Summary">简介</option>
+                            <option value="Both">标题和简介</option>
                         </select>
                     </div>
 
                     <div class="selectTranslationModeEnabled">
                         <div class="selectContainer">
-                            <label class="selectLabel selectLabelText" for="selectTranslationEngine">Translation engine:</label>
+                            <label class="selectLabel selectLabelText" for="selectTranslationEngine">翻译引擎：</label>
                             <select class="emby-select-withcolor emby-select selectTranslationEngine" id="selectTranslationEngine" is="emby-select" name="selectTranslationEngine">
                                 <option value="Baidu">Baidu</option>
                                 <option value="Google">Google</option>
@@ -178,13 +178,13 @@
 
                         <div class="selectTranslationEngineBaidu">
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtBaiduAppId">Baidu app id:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtBaiduAppId">百度 App ID：</label>
                                 <input id="txtBaiduAppId" is="emby-input" name="txtBaiduAppId" type="text"/>
                                 <div class="fieldDescription"></div>
                             </div>
 
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtBaiduAppKey">Baidu app key:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtBaiduAppKey">百度 App Key：</label>
                                 <input id="txtBaiduAppKey" is="emby-input" name="txtBaiduAppKey" type="text"/>
                                 <div class="fieldDescription"></div>
                             </div>
@@ -192,99 +192,99 @@
 
                         <div class="selectTranslationEngineGoogle">
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtGoogleApiKey">Google api key:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtGoogleApiKey">Google API Key：</label>
                                 <input id="txtGoogleApiKey" is="emby-input" name="txtGoogleApiKey" type="text"/>
                                 <div class="fieldDescription"></div>
                             </div>
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtGoogleApiUrl">Google api url:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtGoogleApiUrl">Google API 地址：</label>
                                 <input id="txtGoogleApiUrl" is="emby-input" name="txtGoogleApiUrl" type="text"/>
-                                <div class="fieldDescription">Custom Google translate api url. (optional)</div>
+                                <div class="fieldDescription">自定义 Google 翻译 API 地址。（可选）</div>
                             </div>
                         </div>
 
                         <div class="selectTranslationEngineDeepL">
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtDeepLApiKey">DeepL api key:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtDeepLApiKey">DeepL API Key：</label>
                                 <input id="txtDeepLApiKey" is="emby-input" name="txtDeepLApiKey" type="text"/>
                                 <div class="fieldDescription"></div>
                             </div>
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtDeepLApiUrl">DeepL api url:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtDeepLApiUrl">DeepL API 地址：</label>
                                 <input id="txtDeepLApiUrl" is="emby-input" name="txtDeepLApiUrl" type="text"/>
-                                <div class="fieldDescription">Custom DeepL-compatible api url. (optional)</div>
+                                <div class="fieldDescription">自定义兼容 DeepL 的 API 地址。（可选）</div>
                             </div>
                         </div>
 
                         <div class="selectTranslationEngineOpenAi">
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiApiKey">OpenAI api key:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiApiKey">OpenAI API Key：</label>
                                 <input id="txtOpenAiApiKey" is="emby-input" name="txtOpenAiApiKey" type="text"/>
                                 <div class="fieldDescription"></div>
                             </div>
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiApiUrl">OpenAI api url:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiApiUrl">OpenAI API 地址：</label>
                                 <input id="txtOpenAiApiUrl" is="emby-input" name="txtOpenAiApiUrl" type="text"/>
-                                <div class="fieldDescription">Custom OpenAI-compatible api url. (optional)</div>
+                                <div class="fieldDescription">自定义兼容 OpenAI 的 API 地址。（可选）</div>
                             </div>
                             <div class="inputContainer">
-                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiModel">OpenAI model:</label>
+                                <label class="inputLabel inputLabelUnfocused" for="txtOpenAiModel">OpenAI 模型：</label>
                                 <input id="txtOpenAiModel" is="emby-input" name="txtOpenAiModel" type="text"/>
-                                <div class="fieldDescription">Custom OpenAI-compatible api model. (optional)</div>
+                                <div class="fieldDescription">自定义兼容 OpenAI 的模型名。（可选）</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="verticalSection">
-                    <h2 class="sectionTitle">Substitution</h2>
+                    <h2 class="sectionTitle">替换</h2>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableTitleSubstitution" is="emby-checkbox" name="chkEnableTitleSubstitution" type="checkbox"/>
-                            <span>Enable title substitution</span>
+                            <span>启用标题替换</span>
                         </label>
                         <div class="fieldDescription checkboxFieldDescription"></div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtTitleRawSubstitutionTable">Title substitution table:</label>
+                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtTitleRawSubstitutionTable">标题替换表：</label>
                         <textarea class="emby-input" id="txtTitleRawSubstitutionTable" is="emby-input" name="txtTitleRawSubstitutionTable" rows="5"></textarea>
-                        <div class="fieldDescription">One record per line, separated by equal signs. Leave the target substring blank to delete the source substring.</div>
+                        <div class="fieldDescription">每行一条记录，使用等号分隔。目标文本留空表示删除源文本。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableActorSubstitution" is="emby-checkbox" name="chkEnableActorSubstitution" type="checkbox"/>
-                            <span>Enable actor substitution</span>
+                            <span>启用演员替换</span>
                         </label>
                         <div class="fieldDescription checkboxFieldDescription"></div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtActorRawSubstitutionTable">Actor substitution table:</label>
+                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtActorRawSubstitutionTable">演员替换表：</label>
                         <textarea class="emby-input" id="txtActorRawSubstitutionTable" is="emby-input" name="txtActorRawSubstitutionTable" rows="5"></textarea>
-                        <div class="fieldDescription">One record per line, separated by equal signs. Leave the target actor blank to delete the source actor.</div>
+                        <div class="fieldDescription">每行一条记录，使用等号分隔。目标演员留空表示删除源演员。</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="chkEnableGenreSubstitution" is="emby-checkbox" name="chkEnableGenreSubstitution" type="checkbox"/>
-                            <span>Enable genre substitution</span>
+                            <span>启用类型替换</span>
                         </label>
                         <div class="fieldDescription checkboxFieldDescription"></div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtGenreRawSubstitutionTable">Genre substitution table:</label>
+                        <label class="inputLabel inputLabel-float inputLabelUnfocused" for="txtGenreRawSubstitutionTable">类型替换表：</label>
                         <textarea class="emby-input" id="txtGenreRawSubstitutionTable" is="emby-input" name="txtGenreRawSubstitutionTable" rows="5"></textarea>
-                        <div class="fieldDescription">One record per line, separated by equal signs. Leave the target genre blank to delete the source genre.</div>
+                        <div class="fieldDescription">每行一条记录，使用等号分隔。目标类型留空表示删除源类型。</div>
                     </div>
                 </div>
 
                 <div>
                     <button class="raised button-submit block" is="emby-button" type="submit">
-                        <span>Save</span></button>
+                        <span>保存</span></button>
                 </div>
 
             </form>
