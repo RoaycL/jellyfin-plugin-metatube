@@ -6,6 +6,9 @@ on:
     branches:
       - fix/emby-movie-image-fallback
 
+permissions:
+  contents: write
+
 jobs:
   build-emby-net6:
     runs-on: ubuntu-latest
@@ -44,16 +47,33 @@ jobs:
             --configuration Release.Emby \
             -p:Version=${{ steps.version.outputs.version }}
 
+      - name: Package Emby net6 artifact
+        run: |
+          mkdir -p dist
+          cp Jellyfin.Plugin.MetaTube/bin/Release.Emby/net6.0/MetaTube.dll dist/MetaTube.dll
+          cd dist
+          zip -r Emby.MetaTube-net6-v${{ steps.version.outputs.version }}.zip MetaTube.dll
+
       - name: Upload MetaTube.dll artifact
         uses: actions/upload-artifact@v4
         with:
           name: MetaTube-emby-net6-${{ steps.version.outputs.version }}
-          path: Jellyfin.Plugin.MetaTube/bin/Release.Emby/net6.0/MetaTube.dll
+          path: dist/MetaTube.dll
 
-      - name: Upload Emby zip if present
+      - name: Upload Emby zip artifact
         uses: actions/upload-artifact@v4
         with:
           name: Emby.MetaTube-net6-zip-${{ steps.version.outputs.version }}
-          path: |
-            Jellyfin.Plugin.MetaTube/bin/Emby.MetaTube@v${{ steps.version.outputs.version }}.zip
-          if-no-files-found: ignore
+          path: dist/Emby.MetaTube-net6-v${{ steps.version.outputs.version }}.zip
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: emby-net6-v${{ steps.version.outputs.version }}
+          name: Emby MetaTube net6 v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/MetaTube.dll
+            dist/Emby.MetaTube-net6-v${{ steps.version.outputs.version }}.zip
