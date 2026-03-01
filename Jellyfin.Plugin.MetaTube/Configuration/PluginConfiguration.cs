@@ -14,7 +14,7 @@ namespace Jellyfin.Plugin.MetaTube.Configuration;
 #if __EMBY__
 public class PluginConfiguration : EditableOptionsBase
 {
-    public override string EditorTitle => Plugin.ProviderName;
+    public override string EditorTitle => "MetaTube 设置";
 #else
 public class PluginConfiguration : BasePluginConfiguration
 {
