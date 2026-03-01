@@ -138,7 +138,7 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public static string DefaultNameTemplate => "{number} {title}";
 
-    public static string DefaultTaglineTemplate => "配信開始日 {date}";
+    public static string DefaultTaglineTemplate => "发行日期：{date}";
 
 #if __EMBY__
     [DisplayName("翻译模式")]
