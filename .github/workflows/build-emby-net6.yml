@@ -1,0 +1,59 @@
+name: Build Emby MetaTube (net6)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/emby-movie-image-fallback
+
+jobs:
+  build-emby-net6:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Generate Version
+        id: version
+        run: |
+          echo "version=$(date -u '+%Y.%-m%d.%-H%M.0')" >> "$GITHUB_OUTPUT"
+
+      - name: Patch csproj for Emby net6 build
+        run: |
+          python3 - << 'PY'
+          from pathlib import Path
+          p = Path('Jellyfin.Plugin.MetaTube/Jellyfin.Plugin.MetaTube.csproj')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace(
+              "<TargetFramework Condition=\"'$(Configuration)'=='Debug.Emby' or '$(Configuration)'=='Release.Emby'\">net8.0</TargetFramework>",
+              "<TargetFramework Condition=\"'$(Configuration)'=='Debug.Emby' or '$(Configuration)'=='Release.Emby'\">net6.0</TargetFramework>"
+          )
+          p.write_text(s, encoding='utf-8')
+          print('patched Release.Emby to net6.0 for CI build')
+          PY
+
+      - name: Build Emby plugin
+        run: |
+          dotnet build Jellyfin.Plugin.MetaTube/Jellyfin.Plugin.MetaTube.csproj \
+            --configuration Release.Emby \
+            -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Upload MetaTube.dll artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MetaTube-emby-net6-${{ steps.version.outputs.version }}
+          path: Jellyfin.Plugin.MetaTube/bin/Release.Emby/net6.0/MetaTube.dll
+
+      - name: Upload Emby zip if present
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emby.MetaTube-net6-zip-${{ steps.version.outputs.version }}
+          path: |
+            Jellyfin.Plugin.MetaTube/bin/Emby.MetaTube@v${{ steps.version.outputs.version }}.zip
+          if-no-files-found: ignore
