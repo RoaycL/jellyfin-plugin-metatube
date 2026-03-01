@@ -35,82 +35,160 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
         if (string.IsNullOrWhiteSpace(pid.Id) || string.IsNullOrWhiteSpace(pid.Provider))
             return Enumerable.Empty<RemoteImageInfo>();
 
+        var candidates = BuildCandidates(pid).ToList();
+
+        // 1) Try movie info endpoints in parallel; use first successful one.
+        var infoTasks = candidates.Select(async c =>
+        {
+            try
+            {
+                var m = await ApiClient.GetMovieInfoAsync(c.Provider, c.Id, cancellationToken);
+                return (ok: true, provider: c.Provider, id: c.Id, movie: m, err: string.Empty);
+            }
+            catch (Exception e)
+            {
+                return (ok: false, provider: c.Provider, id: c.Id, movie: default(Jellyfin.Plugin.MetaTube.Metadata.MovieInfo), err: e.Message);
+            }
+        }).ToList();
+
+        var infoResults = await Task.WhenAll(infoTasks);
+        var firstOk = infoResults.FirstOrDefault(x => x.ok);
+        if (firstOk.ok && firstOk.movie != null)
+        {
+            return BuildImages(firstOk.movie.Provider, firstOk.movie.Id, pid.Position, firstOk.movie.PreviewImages);
+        }
+
+        Logger.Warn("All movie info lookups failed for {0}. Trying direct image fallbacks.", pid.ToString());
+        foreach (var r in infoResults)
+        {
+            Logger.Warn("Movie info failed: {0}:{1} => {2}", r.provider, r.id, r.err);
+        }
+
+        // 2) Direct image fallback: probe candidates, use the first primary image that returns 2xx.
+        foreach (var c in candidates)
+        {
+            var primaryUrl = ApiClient.GetPrimaryImageApiUrl(c.Provider, c.Id, pid.Position ?? -1);
+            if (await ProbeImageUrl(primaryUrl, cancellationToken))
+            {
+                Logger.Info("Movie image fallback matched: {0}:{1}", c.Provider, c.Id);
+                return BuildImages(c.Provider, c.Id, pid.Position, Enumerable.Empty<string>());
+            }
+        }
+
+        // 3) Last resort: return all direct candidates so Emby UI can still try.
+        return candidates
+            .SelectMany(c => BuildImages(c.Provider, c.Id, pid.Position, Enumerable.Empty<string>()))
+            .ToList();
+    }
+
+    private IEnumerable<(string Provider, string Id)> BuildCandidates(Jellyfin.Plugin.MetaTube.Helpers.ProviderId pid)
+    {
+        var list = new List<(string Provider, string Id)>();
+
+        void Add(string provider, string id)
+        {
+            if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(id)) return;
+            if (list.Any(x => x.Provider == provider && x.Id == id)) return;
+            list.Add((provider, id));
+        }
+
+        Add(pid.Provider, pid.Id);
+
+        var normalizedId = NormalizeMovieId(pid.Id);
+        if (!string.Equals(normalizedId, pid.Id, StringComparison.OrdinalIgnoreCase))
+            Add(pid.Provider, normalizedId);
+
+        // Common recovery path: AVBASE id often cannot fetch images directly, while JavBus can.
+        if (string.Equals(pid.Provider, "AVBASE", StringComparison.OrdinalIgnoreCase))
+        {
+            Add("JavBus", normalizedId);
+            Add("JavBus", pid.Id);
+        }
+
+        // Extra fallback routes often used by users.
+        Add("JavDB", normalizedId);
+        Add("JavLibrary", normalizedId);
+
+        return list;
+    }
+
+    private static string NormalizeMovieId(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return id;
+        var s = id.Trim();
+        if (s.StartsWith("idp:", StringComparison.OrdinalIgnoreCase))
+            s = s.Substring(4);
+        return s;
+    }
+
+    private IEnumerable<RemoteImageInfo> BuildImages(string provider, string id, double? position, IEnumerable<string> previewImages)
+    {
+        var pos = position ?? -1;
+        var images = new List<RemoteImageInfo>
+        {
+            new()
+            {
+                ProviderName = Name,
+                Type = ImageType.Primary,
+                Url = ApiClient.GetPrimaryImageApiUrl(provider, id, pos)
+            },
+            new()
+            {
+                ProviderName = Name,
+                Type = ImageType.Thumb,
+                Url = ApiClient.GetThumbImageApiUrl(provider, id)
+            },
+            new()
+            {
+                ProviderName = Name,
+                Type = ImageType.Backdrop,
+                Url = ApiClient.GetBackdropImageApiUrl(provider, id)
+            }
+        };
+
+        foreach (var imageUrl in previewImages ?? Enumerable.Empty<string>())
+        {
+            images.Add(new RemoteImageInfo
+            {
+                ProviderName = Name,
+                Type = ImageType.Primary,
+                Url = ApiClient.GetPrimaryImageApiUrl(provider, id, imageUrl, pos)
+            });
+
+            images.Add(new RemoteImageInfo
+            {
+                ProviderName = Name,
+                Type = ImageType.Thumb,
+                Url = ApiClient.GetThumbImageApiUrl(provider, id, imageUrl)
+            });
+
+            images.Add(new RemoteImageInfo
+            {
+                ProviderName = Name,
+                Type = ImageType.Backdrop,
+                Url = ApiClient.GetBackdropImageApiUrl(provider, id, imageUrl)
+            });
+        }
+
+        return images;
+    }
+
+    private async Task<bool> ProbeImageUrl(string url, CancellationToken cancellationToken)
+    {
         try
         {
-            var m = await ApiClient.GetMovieInfoAsync(pid.Provider, pid.Id, cancellationToken);
-            var images = new List<RemoteImageInfo>
-            {
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Primary,
-                    Url = ApiClient.GetPrimaryImageApiUrl(m.Provider, m.Id, pid.Position ?? -1)
-                },
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Thumb,
-                    Url = ApiClient.GetThumbImageApiUrl(m.Provider, m.Id)
-                },
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Backdrop,
-                    Url = ApiClient.GetBackdropImageApiUrl(m.Provider, m.Id)
-                }
-            };
-
-            foreach (var imageUrl in m.PreviewImages ?? Enumerable.Empty<string>())
-            {
-                images.Add(new RemoteImageInfo
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Primary,
-                    Url = ApiClient.GetPrimaryImageApiUrl(m.Provider, m.Id, imageUrl, pid.Position ?? -1)
-                });
-
-                images.Add(new RemoteImageInfo
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Thumb,
-                    Url = ApiClient.GetThumbImageApiUrl(m.Provider, m.Id, imageUrl)
-                });
-
-                images.Add(new RemoteImageInfo
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Backdrop,
-                    Url = ApiClient.GetBackdropImageApiUrl(m.Provider, m.Id, imageUrl)
-                });
-            }
-
-            return images;
+            var resp = await ApiClient.GetImageResponse(url, cancellationToken);
+#if __EMBY__
+            try { resp.Content?.Dispose(); } catch { }
+            var code = (int)resp.StatusCode;
+            return code >= 200 && code < 300;
+#else
+            return resp.IsSuccessStatusCode;
+#endif
         }
-        catch (Exception e)
+        catch
         {
-            Logger.Warn("Movie image info lookup failed for {0}. Fallback to direct image URLs. Error: {1}", pid.ToString(), e.Message);
-
-            return new List<RemoteImageInfo>
-            {
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Primary,
-                    Url = ApiClient.GetPrimaryImageApiUrl(pid.Provider, pid.Id, pid.Position ?? -1)
-                },
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Thumb,
-                    Url = ApiClient.GetThumbImageApiUrl(pid.Provider, pid.Id)
-                },
-                new()
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Backdrop,
-                    Url = ApiClient.GetBackdropImageApiUrl(pid.Provider, pid.Id)
-                }
-            };
+            return false;
         }
     }
 
