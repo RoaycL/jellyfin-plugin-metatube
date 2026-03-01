@@ -98,14 +98,17 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
         if (!string.Equals(normalizedId, pid.Id, StringComparison.OrdinalIgnoreCase))
             Add(pid.Provider, normalizedId);
 
-        // Common recovery path: AVBASE id often cannot fetch images directly, while JavBus can.
+        // Common recovery path: AVBASE ids often cannot fetch images directly, while JavBus can.
         if (string.Equals(pid.Provider, "AVBASE", StringComparison.OrdinalIgnoreCase))
         {
             Add("JavBus", normalizedId);
             Add("JavBus", pid.Id);
+            Add("JavDB", normalizedId);
+            Add("JavLibrary", normalizedId);
         }
 
-        // Extra fallback routes often used by users.
+        // Generic fallback routes.
+        Add("JavBus", normalizedId);
         Add("JavDB", normalizedId);
         Add("JavLibrary", normalizedId);
 
@@ -115,10 +118,19 @@ public class MovieImageProvider : BaseProvider, IRemoteImageProvider, IHasOrder
     private static string NormalizeMovieId(string id)
     {
         if (string.IsNullOrWhiteSpace(id)) return id;
+
         var s = id.Trim();
+
+        // Case 1: idp:IPX-337 -> IPX-337
         if (s.StartsWith("idp:", StringComparison.OrdinalIgnoreCase))
             s = s.Substring(4);
-        return s;
+
+        // Case 2: madonna:JUQ-945 / moodyz:MIAA-625 -> JUQ-945 / MIAA-625
+        var idx = s.LastIndexOf(':');
+        if (idx >= 0 && idx + 1 < s.Length)
+            s = s.Substring(idx + 1);
+
+        return s.Trim();
     }
 
     private IEnumerable<RemoteImageInfo> BuildImages(string provider, string id, double? position, IEnumerable<string> previewImages)
