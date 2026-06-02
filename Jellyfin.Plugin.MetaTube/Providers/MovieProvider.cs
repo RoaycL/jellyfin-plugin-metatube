@@ -32,6 +32,9 @@ public class MovieProvider : BaseProvider, IRemoteMetadataProvider<Movie, MovieI
     private const string Gfriends = "Gfriends";
     private const string Rating = "JP-18+";
 
+    private static readonly string[] DefaultExactSearchProviders =
+        { "JavBus", "JAV321", "AVMOO", "FC2", "AVBASE", "DUGA" };
+
     private static readonly string[] AvBaseSupportedProviderNames = { "DUGA", "FANZA", "Getchu", "MGS" };
 
 #if __EMBY__
@@ -205,9 +208,18 @@ public class MovieProvider : BaseProvider, IRemoteMetadataProvider<Movie, MovieI
         var searchResults = new List<MovieSearchResult>();
         if (string.IsNullOrWhiteSpace(pid.Id) || string.IsNullOrWhiteSpace(pid.Provider))
         {
+            var idCandidates = GetMovieIdCandidates(info.Name).ToList();
+            searchResults.AddRange(await GetExactSearchResults(idCandidates, cancellationToken));
+
             // Search movie by name.
-            Logger.Info("Search for movie: {0}", info.Name);
-            searchResults.AddRange(await ApiClient.SearchMovieAsync(info.Name, pid.Provider, cancellationToken));
+            if (!searchResults.Any() && !idCandidates.Any())
+            {
+                Logger.Info("Search for movie: {0}", info.Name);
+                using var searchCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                searchCts.CancelAfter(TimeSpan.FromSeconds(12));
+                searchResults.AddRange(await ApiClient.SearchMovieAsync(CleanMovieName(info.Name), pid.Provider,
+                    searchCts.Token));
+            }
         }
         else
         {
@@ -256,6 +268,103 @@ public class MovieProvider : BaseProvider, IRemoteMetadataProvider<Movie, MovieI
         }
 
         return results;
+    }
+
+    private async Task<IEnumerable<MovieSearchResult>> GetExactSearchResults(IEnumerable<string> idCandidates,
+        CancellationToken cancellationToken)
+    {
+        var ids = idCandidates.ToList();
+        if (!ids.Any()) return Enumerable.Empty<MovieSearchResult>();
+
+        var providers = GetExactSearchProviders().ToList();
+        if (!providers.Any()) return Enumerable.Empty<MovieSearchResult>();
+
+        var results = new List<MovieSearchResult>();
+        foreach (var id in ids)
+        {
+            foreach (var provider in providers)
+            {
+                try
+                {
+                    Logger.Info("Try exact movie lookup: {0}:{1}", provider, id);
+                    using var lookupCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    lookupCts.CancelAfter(TimeSpan.FromSeconds(8));
+                    var result = await ApiClient.GetMovieInfoAsync(provider, id, lookupCts.Token);
+                    if (result != null)
+                    {
+                        results.Add(result);
+                        return results;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug("Exact movie lookup failed: {0}:{1} ({2})", provider, id, e.Message);
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private IEnumerable<string> GetExactSearchProviders()
+    {
+        if (Configuration.EnableMovieProviderFilter &&
+            Configuration.GetMovieProviderFilter() is { } filter &&
+            filter.Any())
+        {
+            foreach (var provider in filter.Where(x => !string.IsNullOrWhiteSpace(x)))
+                yield return provider.Trim();
+            yield break;
+        }
+
+        foreach (var provider in DefaultExactSearchProviders)
+            yield return provider;
+    }
+
+    private static IEnumerable<string> GetMovieIdCandidates(string name)
+    {
+        var cleaned = CleanMovieName(name);
+        if (string.IsNullOrWhiteSpace(cleaned)) yield break;
+
+        var values = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        void Add(string value)
+        {
+            value = value?.Trim().Trim('-', '_', '.', ' ') ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(value) && seen.Add(value))
+                values.Add(value);
+        }
+
+        Add(cleaned);
+
+        var fc2Match = Regex.Match(cleaned, @"(?i)\bFC2[-_\s]*(?:PPV[-_\s]*)?(\d{3,})\b");
+        if (fc2Match.Success)
+        {
+            var digits = fc2Match.Groups[1].Value;
+            Add($"FC2-PPV-{digits}");
+            Add($"FC2PPV-{digits}");
+            Add(digits);
+        }
+
+        foreach (Match match in Regex.Matches(cleaned, @"(?i)\b([A-Z]{2,10})[-_\s]?(\d{2,6})(?:[-_\s]?(U|UC|C|CH|4K|HD))?\b"))
+        {
+            var number = $"{match.Groups[1].Value.ToUpperInvariant()}-{match.Groups[2].Value}";
+            Add(match.Value.ToUpperInvariant().Replace('_', '-').Replace(' ', '-'));
+            Add(number);
+        }
+
+        foreach (var value in values)
+            yield return value;
+    }
+
+    private static string CleanMovieName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+
+        var cleaned = name.Trim();
+        cleaned = cleaned.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? cleaned;
+        cleaned = Path.GetFileNameWithoutExtension(cleaned);
+        return cleaned.Trim().Trim('-', '_', '.', ' ');
     }
 
     private async Task SetActorImageUrl(PersonInfo actor, CancellationToken cancellationToken)
